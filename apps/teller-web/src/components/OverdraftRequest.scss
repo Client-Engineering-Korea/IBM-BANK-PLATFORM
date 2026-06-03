@@ -1,0 +1,89 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.overdraft-request {
+  margin-top: $spacing-05;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-05;
+    max-width: 600px;
+    margin-top: $spacing-05;
+  }
+}
+
+.overdraft-info {
+  margin-bottom: $spacing-05;
+}
+
+.overdraft-button {
+  margin-top: $spacing-05;
+}
+
+.overdraft-notification {
+  margin-top: $spacing-05;
+}
+
+.overdraft-result {
+  margin-top: $spacing-05;
+
+  h3 {
+    @include type-style('heading-03');
+    margin-bottom: $spacing-05;
+    color: $text-primary;
+  }
+}
+
+.overdraft-details {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  margin-bottom: $spacing-06;
+}
+
+.overdraft-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-03 0;
+  border-bottom: 1px solid $border-subtle;
+
+  .label {
+    @include type-style('body-short-01');
+    color: $text-secondary;
+    font-weight: 600;
+  }
+
+  .value {
+    @include type-style('body-short-01');
+    color: $text-primary;
+  }
+}
+
+.overdraft-message {
+  background-color: $layer-02;
+  padding: $spacing-05;
+  border-radius: 4px;
+  margin-top: $spacing-05;
+
+  p {
+    @include type-style('body-long-01');
+    margin-bottom: $spacing-03;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .message-text {
+    color: $text-primary;
+    font-style: italic;
+    padding: $spacing-04;
+    background-color: $layer-01;
+    border-left: 3px solid $border-interactive;
+    border-radius: 2px;
+  }
+}
+
+// Made with Bob

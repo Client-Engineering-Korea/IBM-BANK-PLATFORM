@@ -1,0 +1,67 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.transfer {
+  margin-top: $spacing-05;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-05;
+    max-width: 600px;
+  }
+}
+
+.transfer-button {
+  margin-top: $spacing-05;
+}
+
+.transfer-notification {
+  margin-top: $spacing-05;
+}
+
+.transfer-confirmation {
+  p {
+    @include type-style('body-long-01');
+    margin-bottom: $spacing-05;
+  }
+}
+
+.transfer-details {
+  background-color: $layer-01;
+  padding: $spacing-05;
+  border-radius: 4px;
+}
+
+.transfer-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-03 0;
+  border-bottom: 1px solid $border-subtle;
+
+  &.transfer-amount {
+    border-bottom: none;
+    padding-top: $spacing-05;
+    margin-top: $spacing-03;
+  }
+
+  .label {
+    @include type-style('body-short-01');
+    color: $text-secondary;
+    font-weight: 600;
+  }
+
+  .value {
+    @include type-style('body-short-01');
+    color: $text-primary;
+  }
+
+  &.transfer-amount .value {
+    @include type-style('heading-03');
+    color: $text-primary;
+    font-weight: 600;
+  }
+}
+
+// Made with Bob

@@ -1,0 +1,41 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.transaction-history {
+  margin-top: $spacing-05;
+}
+
+.transaction-history-form {
+  display: flex;
+  gap: $spacing-05;
+  align-items: flex-end;
+  margin-bottom: $spacing-05;
+
+  .cds--text-input-wrapper {
+    flex: 1;
+  }
+}
+
+.transaction-notification {
+  margin-bottom: $spacing-05;
+}
+
+.transaction-table-skeleton {
+  margin-top: $spacing-05;
+}
+
+.transaction-empty {
+  margin-top: $spacing-07;
+  text-align: center;
+  padding: $spacing-09;
+  background-color: $layer-01;
+  border-radius: 4px;
+
+  p {
+    @include type-style('body-long-01');
+    color: $text-secondary;
+  }
+}
+
+// Made with Bob
