@@ -1,0 +1,70 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.balance-inquiry {
+  margin-top: $spacing-05;
+}
+
+.balance-inquiry-form {
+  display: flex;
+  gap: $spacing-05;
+  align-items: flex-end;
+  margin-bottom: $spacing-05;
+
+  .cds--text-input-wrapper {
+    flex: 1;
+  }
+}
+
+.balance-notification {
+  margin-bottom: $spacing-05;
+}
+
+.balance-result {
+  margin-top: $spacing-05;
+
+  h3 {
+    @include type-style('heading-03');
+    margin-bottom: $spacing-05;
+    color: $text-primary;
+  }
+}
+
+.balance-details {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.balance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-03 0;
+  border-bottom: 1px solid $border-subtle;
+
+  &.balance-amount {
+    border-bottom: none;
+    padding-top: $spacing-05;
+    margin-top: $spacing-03;
+  }
+}
+
+.balance-label {
+  @include type-style('body-short-01');
+  color: $text-secondary;
+  font-weight: 600;
+}
+
+.balance-value {
+  @include type-style('body-short-01');
+  color: $text-primary;
+
+  &.balance-highlight {
+    @include type-style('heading-04');
+    color: $text-primary;
+    font-weight: 600;
+  }
+}
+
+// Made with Bob

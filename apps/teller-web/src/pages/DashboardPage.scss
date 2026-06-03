@@ -1,0 +1,41 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.dashboard-page {
+  min-height: 100vh;
+  background-color: $layer;
+}
+
+.dashboard-content {
+  padding-top: $spacing-07;
+}
+
+.dashboard-header {
+  margin-bottom: $spacing-07;
+
+  h1 {
+    @include type-style('heading-05');
+    color: $text-primary;
+    margin-bottom: $spacing-03;
+  }
+
+  p {
+    @include type-style('body-long-01');
+    color: $text-secondary;
+  }
+}
+
+.user-name {
+  margin-left: $spacing-03;
+  @include type-style('body-short-01');
+}
+
+// Override Carbon Header styles for better spacing
+.cds--header__global {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// Made with Bob
