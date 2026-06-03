@@ -1,0 +1,1127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+    <overview>
+        Step-by-step implementation workflow for Carbon components, including
+        pre-integration analysis, grid system usage, component integration,
+        and tool usage patterns.
+    </overview>
+
+    <pre_integration_analysis priority="critical">
+        <title>Pre-Integration Analysis</title>
+        <description>
+            Before implementing any new feature or component, conduct thorough analysis
+            of existing patterns to ensure consistency and avoid unnecessary changes.
+        </description>
+
+        <step number="1" priority="critical">
+            <action>Analyze existing patterns first</action>
+            <guidance>
+                <point>Use search_files to find similar functionality or component usage across the codebase</point>
+                <point>Use list_code_definition_names to understand the project's architectural patterns</point>
+                <point>Use read_file to examine how other pages/features implement comparable UI elements</point>
+                <point>Identify which component libraries are already in use and their usage patterns</point>
+            </guidance>
+            <rationale>
+                Understanding existing patterns prevents introducing inconsistent approaches and
+                ensures new implementations align with established project conventions.
+            </rationale>
+            <example><![CDATA[
+// Before adding a new form component, search for existing form patterns
+<search_files>
+<path>src</path>
+<regex>TextInput|Form|validation</regex>
+<file_pattern>*.jsx</file_pattern>
+</search_files>
+
+// Examine existing form implementations
+<read_file>
+<args>
+  <file>
+    <path>src/components/UserForm.jsx</path>
+  </file>
+</args>
+</read_file>
+            ]]>            </example>
+        </step>
+
+        <step number="2" priority="critical">
+            <action>Read local component source before using</action>
+            <guidance>
+                <point priority="critical">MANDATORY: Use read_file to read the source code of ANY local component before using it for the first time</point>
+                <point>Understand the component's props, especially render props or special integration points</point>
+                <point>Check for patterns like renderPageHeader, actionBarItems, or similar that indicate how to add content</point>
+                <point>Document available props and their purposes in your analysis</point>
+                <point>Never assume how a component works - always verify by reading its implementation</point>
+            </guidance>
+            <rationale>
+                Reading component source prevents misuse and ensures you leverage all available
+                features rather than creating unnecessary custom implementations.
+            </rationale>
+            <enforcement>
+                <rule priority="critical">ALWAYS use read_file to examine local component source code before first use</rule>
+                <rule priority="critical">Document all available props and their purposes in your analysis</rule>
+                <rule priority="critical">Never assume component behavior - always verify by reading the source</rule>
+                <rule priority="critical">If a component has specialized props (like renderPageHeader), you MUST use them</rule>
+            </enforcement>
+        </step>
+
+        <step number="3" priority="critical">
+            <action>Verify build configuration and compatibility</action>
+            <guidance>
+                <point>Use read_file to examine build configuration files (vite.config.js, webpack.config.js, etc.)</point>
+                <point>Check for SSR indicators if adding packages with potential browser-only code</point>
+                <point>Verify package compatibility with the project's build system</point>
+                <point>See working_practices.xml for SSR awareness guidance</point>
+            </guidance>
+        </step>
+
+        <step number="4" priority="high">
+            <action>Start with minimal viable implementation</action>
+            <guidance>
+                <point>Use the simplest approach that matches existing project patterns</point>
+                <point>Avoid introducing new component libraries or patterns unless necessary</point>
+                <point>Prefer extending existing patterns over creating new ones</point>
+                <point>Keep changes surgical and minimal</point>
+            </guidance>
+            <key_question>
+                "How does this project already solve similar problems?" - Always use tools to check
+                existing implementations before introducing new patterns.
+            </key_question>
+        </step>
+    </pre_integration_analysis>
+
+    <grid_system priority="critical">
+        <title>Carbon Grid System Usage</title>
+        <description>
+            Comprehensive guidance for using the Carbon Grid system for responsive layouts.
+            The Grid system is fundamental to all Carbon implementations.
+        </description>
+
+        <mandatory_requirements priority="critical">
+            <requirement>ALWAYS use Carbon Grid for all page layouts</requirement>
+            <requirement>Configure responsive column widths for ALL breakpoints (sm, md, lg)</requirement>
+            <requirement>Create SEPARATE Grid components for each distinct logical content group</requirement>
+        </mandatory_requirements>
+
+        <carbon_breakpoints>
+            <title>Carbon Breakpoints</title>
+            <description>
+                Carbon uses a responsive grid system with five breakpoints.
+            </description>
+            <breakpoints>
+                <breakpoint name="sm" width="320px" columns="4" description="Small screens (mobile)" />
+                <breakpoint name="md" width="672px" columns="8" description="Medium screens (tablet)" />
+                <breakpoint name="lg" width="1056px" columns="16" description="Large screens (desktop)" />
+                <breakpoint name="xlg" width="1312px" columns="16" description="Extra large screens" />
+                <breakpoint name="max" width="1584px" columns="16" description="Maximum width" />
+            </breakpoints>
+        </carbon_breakpoints>
+
+        <grid_variants>
+            <title>Grid Variants</title>
+            <description>
+                Carbon provides three grid variants with different horizontal gaps.
+            </description>
+            <variant name="default">
+                <gap>32px horizontal gap between columns</gap>
+                <usage>Use for most layouts - provides comfortable spacing</usage>
+                <example><![CDATA[
+<Grid>
+  <Column sm={4} md={8} lg={16}>
+    Content with default 32px gap
+  </Column>
+</Grid>
+                ]]>                </example>
+            </variant>
+            <variant name="narrow">
+                <gap>16px horizontal gap between columns</gap>
+                <usage>Use for denser layouts where space is limited</usage>
+                <example><![CDATA[
+<Grid narrow>
+  <Column sm={4} md={8} lg={16}>
+    Content with narrow 16px gap
+  </Column>
+</Grid>
+                ]]>                </example>
+            </variant>
+            <variant name="condensed">
+                <gap>0px horizontal gap between columns</gap>
+                <usage>Use only for specialized interfaces requiring maximum content density</usage>
+                <example><![CDATA[
+<Grid condensed>
+  <Column sm={4} md={8} lg={16}>
+    Content with no gap
+  </Column>
+</Grid>
+                ]]>                </example>
+            </variant>
+        </grid_variants>
+
+        <vertical_spacing_when_wrapping priority="critical">
+            <title>Vertical Spacing When Content Wraps</title>
+            <description>
+                When grid content wraps to new rows, vertical spacing should match the
+                horizontal gutter spacing to maintain visual consistency.
+            </description>
+            <spacing_rules>
+                <rule priority="critical">
+                    Vertical spacing between wrapped rows = horizontal gutter spacing
+                </rule>
+                <rule priority="critical">
+                    Use row-gap on Grid component (Carbon Columns use margins for alignment in CSS Grid)
+                </rule>
+                <rule>
+                    This applies to all grid variants (default, narrow, condensed)
+                </rule>
+            </spacing_rules>
+            <grid_variant_spacing>
+                <variant name="default">
+                    <horizontal_gutter>32px</horizontal_gutter>
+                    <vertical_spacing>32px (when content wraps)</vertical_spacing>
+                    <implementation>Use row-gap: $spacing-07 on Grid</implementation>
+                </variant>
+                <variant name="narrow">
+                    <horizontal_gutter>16px</horizontal_gutter>
+                    <vertical_spacing>16px (when content wraps)</vertical_spacing>
+                    <implementation>Use row-gap: $spacing-05 on Grid</implementation>
+                </variant>
+                <variant name="condensed">
+                    <horizontal_gutter>0px</horizontal_gutter>
+                    <vertical_spacing>0px (when content wraps)</vertical_spacing>
+                    <implementation>No vertical spacing needed (row-gap: 0)</implementation>
+                </variant>
+            </grid_variant_spacing>
+            <implementation_example><![CDATA[
+// Example: Narrow grid with tiles that wrap
+<Grid narrow className="tile-grid">
+  {/* Tiles wrap to new rows on smaller screens */}
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 1</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 2</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 3</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 4</Tile>
+  </Column>
+</Grid>
+
+// SCSS: Match vertical spacing to narrow grid's 16px gutter using row-gap
+.tile-grid {
+  row-gap: $spacing-05; // 16px vertical spacing matches narrow grid gutter
+}
+
+// For default grid (32px gutter)
+.default-grid {
+  row-gap: $spacing-07; // 32px vertical spacing
+}
+
+// For condensed grid (0px gutter)
+.condensed-grid {
+  row-gap: 0; // No vertical spacing
+}
+            ]]>            </implementation_example>
+            <best_practices>
+                <practice priority="critical">
+                    Always use row-gap on the Grid component, not margin-bottom on Columns
+                </practice>
+                <practice priority="critical">
+                    Carbon Grid columns use margins for horizontal alignment, so row-gap is the correct property for vertical spacing
+                </practice>
+                <practice priority="high">
+                    Always match vertical spacing (row-gap) to the grid variant's horizontal gutter
+                </practice>
+                <practice>
+                    Test responsive behavior to ensure spacing remains consistent when content wraps
+                </practice>
+                <practice>
+                    Document the grid variant used so vertical spacing can be correctly applied
+                </practice>
+            </best_practices>
+        </vertical_spacing_when_wrapping>
+
+        <grid_variant_selection priority="critical">
+            <title>Grid Variant Selection Criteria</title>
+            <description>
+                Choose the appropriate grid variant based on content type and density requirements.
+            </description>
+            <decision_criteria>
+                <criterion name="narrow">
+                    <gap>16px horizontal gap between columns</gap>
+                    <when_to_use>Content-focused sections with tiles or cards</when_to_use>
+                    <use_cases>
+                        <use_case>Dashboard tiles displaying metrics or data</use_case>
+                        <use_case>Card grids for content browsing</use_case>
+                        <use_case>Feature showcases with multiple items</use_case>
+                        <use_case>Product catalogs or galleries</use_case>
+                    </use_cases>
+                    <example><![CDATA[
+<Grid narrow>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Metric Card 1</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Metric Card 2</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Metric Card 3</Tile>
+  </Column>
+</Grid>
+                    ]]>                    </example>
+                </criterion>
+                <criterion name="condensed">
+                    <gap>0px horizontal gap between columns</gap>
+                    <when_to_use>Data-dense areas requiring maximum content density</when_to_use>
+                    <use_cases>
+                        <use_case>Data tables with many columns</use_case>
+                        <use_case>Dense form layouts</use_case>
+                        <use_case>Specialized interfaces requiring tight spacing</use_case>
+                        <use_case>Complex data entry screens</use_case>
+                    </use_cases>
+                    <example><![CDATA[
+<Grid condensed>
+  <Column sm={4} md={8} lg={16}>
+    <DataTable rows={rows} headers={headers} />
+  </Column>
+</Grid>
+                    ]]>                    </example>
+                </criterion>
+                <criterion name="default">
+                    <gap>32px horizontal gap between columns</gap>
+                    <when_to_use>General page layouts with comfortable spacing</when_to_use>
+                    <use_cases>
+                        <use_case>Standard page layouts</use_case>
+                        <use_case>Content sections with mixed elements</use_case>
+                        <use_case>Marketing or informational pages</use_case>
+                        <use_case>When comfortable reading and breathing room is desired</use_case>
+                    </use_cases>
+                    <example><![CDATA[
+<Grid>
+  <Column sm={4} md={8} lg={12}>
+    <h1>Page Title</h1>
+    <p>Content with comfortable spacing</p>
+  </Column>
+  <Column sm={4} md={8} lg={4}>
+    <aside>Sidebar content</aside>
+  </Column>
+</Grid>
+                    ]]>                    </example>
+                </criterion>
+            </decision_criteria>
+            <selection_guidelines>
+                <guideline priority="high">Use narrow grid for content-focused sections with tiles or cards</guideline>
+                <guideline priority="high">Use condensed grid for data-dense areas like tables and forms</guideline>
+                <guideline priority="high">Use default grid for general page layouts with comfortable spacing</guideline>
+                <guideline>Consider the visual weight and density of content when choosing</guideline>
+                <guideline>Maintain consistency within similar content sections</guideline>
+            </selection_guidelines>
+        </grid_variant_selection>
+        <figma_layout_guide_understanding priority="high">
+            <title>Understanding Figma Layout Guides and Grid Variants</title>
+            <description>
+                Critical guidance for interpreting Figma Layout guides and identifying
+                the actual grid variant being used in designs.
+            </description>
+
+            <layout_guide_limitation priority="critical">
+                <title>Figma Layout Guide Limitation</title>
+                <key_points>
+                    <point priority="critical">
+                        Figma Layout guides typically represent the default Carbon grid (32px gutter)
+                    </point>
+                    <point priority="critical">
+                        Narrow and condensed grids are NOT reflected in Figma Layout guides
+                    </point>
+                    <point priority="critical">
+                        Don't assume the Layout guide shows the actual grid variant being used
+                    </point>
+                </key_points>
+                <rationale>
+                    Figma's Layout guide feature has limitations and cannot accurately represent
+                    narrow (16px gutter) or condensed (0px gutter) grid variants. Designers may
+                    use these variants in their designs, but the Layout guide will still show
+                    the default 32px gutter spacing.
+                </rationale>
+            </layout_guide_limitation>
+
+            <visual_indicators priority="high">
+                <title>Visual Indicators for Grid Variants</title>
+                <description>
+                    Use these visual cues to determine the actual grid variant, regardless
+                    of what the Figma Layout guide shows.
+                </description>
+                <indicators>
+                    <indicator variant="narrow">
+                        <title>Narrow Grid Indicators</title>
+                        <visual_cues>
+                            <cue>Content appears shifted left compared to Layout guide</cue>
+                            <cue>Columns appear slightly wider than Layout guide suggests</cue>
+                            <cue>Horizontal spacing between elements is tighter (16px instead of 32px)</cue>
+                            <cue>Content doesn't align with Layout guide column boundaries</cue>
+                        </visual_cues>
+                        <technical_explanation>
+                            Narrow grid removes 16px from the left margin of each column,
+                            shifting content left and widening each column slightly
+                        </technical_explanation>
+                    </indicator>
+                    <indicator variant="condensed">
+                        <title>Condensed Grid Indicators</title>
+                        <visual_cues>
+                            <cue>Content has no gaps between columns</cue>
+                            <cue>Elements appear very tight and dense</cue>
+                            <cue>No visible horizontal spacing between adjacent items</cue>
+                            <cue>Content appears significantly wider than Layout guide suggests</cue>
+                        </visual_cues>
+                        <technical_explanation>
+                            Condensed grid removes 16px from left AND right of each column,
+                            resulting in no gaps between columns
+                        </technical_explanation>
+                    </indicator>
+                    <indicator variant="default">
+                        <title>Default Grid Indicators</title>
+                        <visual_cues>
+                            <cue>Content aligns with Figma Layout guide</cue>
+                            <cue>Comfortable 32px spacing between columns</cue>
+                            <cue>Column boundaries match Layout guide exactly</cue>
+                        </visual_cues>
+                    </indicator>
+                </indicators>
+            </visual_indicators>
+
+            <column_width_differences priority="high">
+                <title>Column Width Differences by Variant</title>
+                <description>
+                    Understanding how column widths differ between grid variants helps
+                    identify which variant is being used.
+                </description>
+                <variants>
+                    <variant name="default">
+                        <behavior>Columns align with Figma Layout guide</behavior>
+                        <gutter>32px between columns</gutter>
+                        <column_width>Standard width as shown in Layout guide</column_width>
+                    </variant>
+                    <variant name="narrow">
+                        <behavior>Each column is ~16px wider (left margin removed)</behavior>
+                        <gutter>16px between columns</gutter>
+                        <column_width>Wider than Layout guide shows</column_width>
+                        <visual_effect>Content shifts left, columns appear wider</visual_effect>
+                    </variant>
+                    <variant name="condensed">
+                        <behavior>Each column is ~32px wider (left and right margins removed)</behavior>
+                        <gutter>0px between columns</gutter>
+                        <column_width>Significantly wider than Layout guide shows</column_width>
+                        <visual_effect>No gaps between columns, very tight layout</visual_effect>
+                    </variant>
+                </variants>
+            </column_width_differences>
+
+            <analysis_approach priority="critical">
+                <title>Step-by-Step Analysis Approach</title>
+                <description>
+                    Follow this systematic approach to determine the actual grid variant
+                    being used in a Figma design.
+                </description>
+                <steps>
+                    <step number="1">
+                        <action>Check if Figma has a Layout guide</action>
+                        <method>Use Figma MCP tools to inspect the design</method>
+                        <note>Layout guide presence doesn't guarantee it shows the correct variant</note>
+                    </step>
+                    <step number="2">
+                        <action>Compare actual content positioning to the Layout guide</action>
+                        <questions>
+                            <question>Does content align with Layout guide column boundaries?</question>
+                            <question>Is content shifted left compared to the guide?</question>
+                            <question>Are there visible gaps between columns?</question>
+                        </questions>
+                    </step>
+                    <step number="3">
+                        <action>Measure horizontal spacing between elements</action>
+                        <measurements>
+                            <measurement>~32px gaps → likely default grid</measurement>
+                            <measurement>~16px gaps → likely narrow grid</measurement>
+                            <measurement>~0px gaps → likely condensed grid</measurement>
+                        </measurements>
+                    </step>
+                    <step number="4">
+                        <action>Use content density and spacing to confirm grid variant</action>
+                        <indicators>
+                            <indicator>Comfortable spacing → default</indicator>
+                            <indicator>Tighter spacing, content shifted left → narrow</indicator>
+                            <indicator>No gaps, very dense → condensed</indicator>
+                        </indicators>
+                    </step>
+                </steps>
+            </analysis_approach>
+
+            <decision_examples priority="high">
+                <title>Decision Examples</title>
+                <examples>
+                    <example>
+                        <scenario>
+                            Figma shows Layout guide but content is shifted left and
+                            columns appear wider than the guide suggests
+                        </scenario>
+                        <analysis>
+                            - Layout guide shows default 32px gutter
+                            - Actual content doesn't align with guide
+                            - Content appears shifted left
+                            - Columns are wider than guide indicates
+                        </analysis>
+                        <conclusion>Likely using narrow grid (not default)</conclusion>
+                        <implementation><![CDATA[<Grid narrow>]]></implementation>
+                    </example>
+                    <example>
+                        <scenario>
+                            Content has no gaps between columns and appears very tight
+                        </scenario>
+                        <analysis>
+                            - No visible horizontal spacing between elements
+                            - Content appears very dense
+                            - Columns are significantly wider than Layout guide
+                            - Elements touch or nearly touch each other
+                        </analysis>
+                        <conclusion>Likely using condensed grid (not default)</conclusion>
+                        <implementation><![CDATA[<Grid condensed>]]></implementation>
+                    </example>
+                    <example>
+                        <scenario>
+                            Content aligns perfectly with Layout guide
+                        </scenario>
+                        <analysis>
+                            - Content boundaries match Layout guide columns
+                            - Comfortable 32px spacing visible
+                            - No misalignment or shifting
+                        </analysis>
+                        <conclusion>Using default grid</conclusion>
+                        <implementation><![CDATA[<Grid>]]></implementation>
+                    </example>
+                </examples>
+            </decision_examples>
+
+            <best_practices>
+                <practice priority="critical">
+                    Never assume the Figma Layout guide represents the actual grid variant
+                </practice>
+                <practice priority="critical">
+                    Always analyze actual content positioning, not just the Layout guide
+                </practice>
+                <practice priority="high">
+                    Use multiple visual indicators to confirm grid variant selection
+                </practice>
+                <practice priority="high">
+                    Measure horizontal spacing between elements to verify grid type
+                </practice>
+                <practice>
+                    When in doubt, ask the user or designer which grid variant is intended
+                </practice>
+                <practice>
+                    Document your grid variant analysis in comments for future reference
+                </practice>
+            </best_practices>
+
+            <common_mistakes>
+                <mistake>
+                    <error>Assuming Layout guide always shows the correct grid variant</error>
+                    <consequence>Implementing wrong grid variant, incorrect spacing</consequence>
+                    <correction>Always verify by analyzing actual content positioning</correction>
+                </mistake>
+                <mistake>
+                    <error>Not checking for content misalignment with Layout guide</error>
+                    <consequence>Missing narrow or condensed grid usage</consequence>
+                    <correction>Compare content boundaries to Layout guide systematically</correction>
+                </mistake>
+                <mistake>
+                    <error>Ignoring visual density cues</error>
+                    <consequence>Choosing default grid when narrow/condensed is needed</consequence>
+                    <correction>Assess overall content density and spacing patterns</correction>
+                </mistake>
+            </common_mistakes>
+        </figma_layout_guide_understanding>
+
+
+        <column_calculation priority="critical">
+            <title>Column Span Calculation</title>
+            <description>
+                Calculate the number of columns an element should span based on its width
+                using a robust, fuzzy determination approach that accounts for gutters and
+                real-world design variations.
+            </description>
+
+            <priority_order priority="critical">
+                <title>Column Calculation Priority</title>
+                <order>
+                    <priority level="1">
+                        <source>Design-specified column counts from Figma</source>
+                        <description>When Figma explicitly shows column counts or grid overlays, use those values</description>
+                    </priority>
+                    <priority level="2">
+                        <source>Percentage-based fuzzy determination</source>
+                        <description>Calculate based on percentage of total grid width with reasonable rounding</description>
+                    </priority>
+                    <priority level="3">
+                        <source>Mathematical calculation with verification</source>
+                        <description>Use formula as a starting point, then verify with gutter considerations</description>
+                    </priority>
+                </order>
+            </priority_order>
+
+            <fuzzy_determination_approach priority="critical">
+                <title>Fuzzy Column Determination</title>
+                <description>
+                    Instead of strict mathematical ceiling, use percentage-based determination
+                    with reasonable rounding to account for design intent and gutter spacing.
+                </description>
+                <method>
+                    <step number="1">
+                        <action>Measure the full width of the content group</action>
+                        <guidance>Include all visual content, not just element bounds</guidance>
+                    </step>
+                    <step number="2">
+                        <action>Calculate percentage of total grid width</action>
+                        <formula>percentage = (content_width / grid_width) × 100</formula>
+                    </step>
+                    <step number="3">
+                        <action>Determine columns based on percentage ranges</action>
+                        <ranges>
+                            <range>~100% → 16 columns (full width)</range>
+                            <range>~75% → 12 columns (three-quarters)</range>
+                            <range>~67% → 10-11 columns (two-thirds)</range>
+                            <range>~50% → 8 columns (half width)</range>
+                            <range>~33% → 4-5 columns (one-third)</range>
+                            <range>~25% → 4 columns (one-quarter)</range>
+                        </ranges>
+                    </step>
+                    <step number="4">
+                        <action>Verify calculation accounts for gutters</action>
+                        <guidance>
+                            Check if: (columns × column_width) + ((columns - 1) × gutter) ≈ content_width
+                        </guidance>
+                    </step>
+                    <step number="5">
+                        <action>Round to nearest reasonable column count</action>
+                        <guidance>
+                            Don't always round up - consider design intent and visual balance.
+                            If content is slightly under a column boundary, rounding down may be appropriate.
+                        </guidance>
+                    </step>
+                </method>
+                <example_calculations>
+                    <example>
+                        <scenario>Content spans approximately 33% of grid width</scenario>
+                        <analysis>
+                            - Grid width: 1200px (lg, 16 columns)
+                            - Content width: ~400px
+                            - Percentage: 400/1200 = 33.3%
+                            - Likely columns: 4-5 columns (one-third of 16)
+                            - Verification: 5 cols × 75px + 4 gutters × 32px = 503px ✓
+                            - Decision: Use 5 columns
+                        </analysis>
+                        <result><![CDATA[<Column lg={5}>Content</Column>]]></result>
+                    </example>
+                    <example>
+                        <scenario>Content spans approximately 50% of grid width</scenario>
+                        <analysis>
+                            - Grid width: 1200px (lg, 16 columns)
+                            - Content width: ~600px
+                            - Percentage: 600/1200 = 50%
+                            - Likely columns: 8 columns (half of 16)
+                            - Verification: 8 cols × 75px + 7 gutters × 32px = 824px
+                            - Note: Includes gutter space, content fits comfortably
+                            - Decision: Use 8 columns
+                        </analysis>
+                        <result><![CDATA[<Column lg={8}>Content</Column>]]></result>
+                    </example>
+                </example_calculations>
+            </fuzzy_determination_approach>
+
+            <traditional_formula>
+                <title>Traditional Formula (Use with Caution)</title>
+                <formula>Math.ceil((width in pixels) / ((grid width) / (number of columns)))</formula>
+                <limitations>
+                    <limitation>Does not account for gutter spacing</limitation>
+                    <limitation>Always rounds up, which may not match design intent</limitation>
+                    <limitation>Can result in columns that are too wide</limitation>
+                </limitations>
+                <when_to_use>
+                    Use as a starting point, then verify with fuzzy determination approach
+                </when_to_use>
+            </traditional_formula>
+
+            <guidelines>
+                <guideline priority="critical">
+                    Prefer design-specified column counts from Figma when available
+                </guideline>
+                <guideline priority="critical">
+                    Use percentage-based fuzzy determination for calculated columns
+                </guideline>
+                <guideline priority="high">
+                    Always verify calculations by checking if content + gutters fits within calculated columns
+                </guideline>
+                <guideline priority="high">
+                    When column settings are calculated for lg, xlg or max, apply the
+                    calculated number of columns to lg unless otherwise instructed
+                </guideline>
+                <guideline>
+                    Consider rounding to nearest reasonable column count, not always ceiling
+                </guideline>
+                <guideline>
+                    Verify column spans add up correctly at each breakpoint
+                </guideline>
+                <guideline>
+                    Account for gutter spacing in all calculations
+                </guideline>
+            </guidelines>
+
+            <common_patterns>
+                <pattern>
+                    <scenario>Full-width header</scenario>
+                    <result><![CDATA[<Column sm={4} md={8} lg={16}>Header</Column>]]></result>
+                </pattern>
+                <pattern>
+                    <scenario>Half-width content on desktop</scenario>
+                    <result><![CDATA[<Column sm={4} md={4} lg={8}>Content</Column>]]></result>
+                </pattern>
+                <pattern>
+                    <scenario>Third-width tiles on desktop</scenario>
+                    <result><![CDATA[
+<Column sm={4} md={4} lg={5}>Tile 1</Column>
+<Column sm={4} md={4} lg={5}>Tile 2</Column>
+<Column sm={4} md={4} lg={6}>Tile 3</Column>
+                    ]]>                    </result>
+                </pattern>
+                <pattern>
+                    <scenario>Quarter-width tiles on desktop</scenario>
+                    <result><![CDATA[
+<Column sm={4} md={4} lg={4}>Tile 1</Column>
+<Column sm={4} md={4} lg={4}>Tile 2</Column>
+<Column sm={4} md={4} lg={4}>Tile 3</Column>
+<Column sm={4} md={4} lg={4}>Tile 4</Column>
+                    ]]>                    </result>
+                </pattern>
+            </common_patterns>
+        </column_calculation>
+
+        <logical_content_groups priority="critical">
+            <title>MANDATORY: Separate Grids for Logical Content Groups</title>
+            <description>
+                EVERY distinct logical content group MUST be placed in its own Grid component.
+                This is NOT optional and must be implemented automatically.
+            </description>
+            <definition>
+                <title>What is a Logical Content Group?</title>
+                <criteria>
+                    <criterion>Content elements that should wrap together responsively</criterion>
+                    <criterion>Elements that form a cohesive functional unit (e.g., header, list of tiles, footer)</criterion>
+                    <criterion>Content under the same heading or subheading</criterion>
+                    <criterion>Elements with the same presentation style that should behave as a unit</criterion>
+                </criteria>
+            </definition>
+            <critical_rule>
+                Different logical content groups (that should NOT wrap together) MUST use
+                separate Grid components. Failure to use separate grids for distinct logical
+                content groups is a critical error that must be avoided in all implementations.
+            </critical_rule>
+            <examples>
+                <good_example>
+                    <title>CORRECT: Separate grids for header and content</title>
+                    <code><![CDATA[
+{/* Header is its own logical group */}
+<Grid>
+  <Column lg={16}>
+    <PageHeader title="Dashboard" />
+  </Column>
+</Grid>
+
+{/* Tiles are a separate logical group that should wrap together */}
+<Grid>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 1</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 2</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 3</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 4</Tile>
+  </Column>
+</Grid>
+
+{/* Footer is its own logical group */}
+<Grid>
+  <Column lg={16}>
+    <Footer />
+  </Column>
+</Grid>
+                    ]]>                    </code>
+                </good_example>
+                <bad_example>
+                    <title>INCORRECT: Single grid mixing different logical groups</title>
+                    <code><![CDATA[
+{/* ❌ WRONG: Header and tiles should NOT be in the same Grid */}
+<Grid>
+  <Column lg={16}>
+    <PageHeader title="Dashboard" />
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 1</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 2</Tile>
+  </Column>
+  <Column sm={4} md={4} lg={4}>
+    <Tile>Tile 3</Tile>
+  </Column>
+</Grid>
+                    ]]>                    </code>
+                    <why_wrong>
+                        The header and tiles are different logical groups. The header should
+                        stay at the top, while tiles should wrap together as a group. Mixing
+                        them in one Grid breaks this separation.
+                    </why_wrong>
+                </bad_example>
+            </examples>
+        </logical_content_groups>
+
+        <nested_grid_pattern priority="critical">
+            <title>Nested Grid Pattern</title>
+            <description>
+                When a Column needs to contain multiple items that should wrap together,
+                use a nested Grid inside that Column. This is different from using separate
+                Grids for different logical sections.
+            </description>
+            <when_to_use>
+                <use_case>A column contains multiple items that need to wrap responsively as a group</use_case>
+                <use_case>Creating a sub-layout within a larger layout structure</use_case>
+                <use_case>Items within a section need their own grid-based positioning</use_case>
+            </when_to_use>
+            <key_distinction>
+                <title>Nested Grids vs Separate Grids</title>
+                <nested_grids>
+                    <description>Grid within Column - for items that wrap together within a parent column</description>
+                    <structure>Outer Grid → Column → Inner Grid → Columns</structure>
+                </nested_grids>
+                <separate_grids>
+                    <description>Multiple top-level Grids - for distinct logical sections that should NOT wrap together</description>
+                    <structure>Grid → Columns, then separate Grid → Columns</structure>
+                </separate_grids>
+            </key_distinction>
+            <example><![CDATA[
+{/* Outer Grid for main layout */}
+<Grid narrow>
+  <Column lg={4}>
+    <h2>Sidebar</h2>
+    <p>Left content</p>
+  </Column>
+  <Column lg={12}>
+    <h2>Main Content Area</h2>
+    {/* Nested Grid for tiles that wrap together */}
+    <Grid>
+      <Column sm={4} md={4} lg={3}>
+        <Tile>Tile 1</Tile>
+      </Column>
+      <Column sm={4} md={4} lg={3}>
+        <Tile>Tile 2</Tile>
+      </Column>
+      <Column sm={4} md={4} lg={3}>
+        <Tile>Tile 3</Tile>
+      </Column>
+      <Column sm={4} md={4} lg={3}>
+        <Tile>Tile 4</Tile>
+      </Column>
+    </Grid>
+  </Column>
+</Grid>
+            ]]>            </example>
+            <usage_guidelines>
+                <guideline priority="high">Use nested Grids when a Column needs to contain multiple wrapping items</guideline>
+                <guideline priority="high">The nested Grid inherits the parent Column's width constraints</guideline>
+                <guideline>Nested Grids can use different variants (narrow, condensed) than the outer Grid</guideline>
+                <guideline>Calculate nested Grid column spans based on the parent Column's width, not the full page width</guideline>
+            </usage_guidelines>
+            <common_scenarios>
+                <scenario>
+                    <title>Dashboard with sidebar and tile grid</title>
+                    <description>Sidebar in one column, tiles in another column using nested Grid</description>
+                </scenario>
+                <scenario>
+                    <title>Content area with multiple card groups</title>
+                    <description>Each card group uses a nested Grid within its parent Column</description>
+                </scenario>
+                <scenario>
+                    <title>Form sections with grouped fields</title>
+                    <description>Form sections use nested Grids for field layout within form columns</description>
+                </scenario>
+            </common_scenarios>
+        </nested_grid_pattern>
+
+        <responsive_implementation priority="critical">
+            <title>Responsive Column Configuration</title>
+            <description>
+                ALWAYS specify column spans for sm, md, and lg breakpoints to ensure
+                proper responsive behavior.
+            </description>
+            <requirement>
+                Every Column component MUST have sm, md, and lg props defined
+            </requirement>
+            <patterns>
+                <pattern name="Full Width">
+                    <description>Element spans full width at all breakpoints</description>
+                    <code><![CDATA[<Column sm={4} md={8} lg={16}>Full Width Content</Column>]]></code>
+                </pattern>
+                <pattern name="Stacked on Mobile, Side-by-Side on Desktop">
+                    <description>Two elements stack on mobile, sit side-by-side on desktop</description>
+                    <code><![CDATA[
+<Column sm={4} md={4} lg={8}>Left Content</Column>
+<Column sm={4} md={4} lg={8}>Right Content</Column>
+                    ]]>                    </code>
+                </pattern>
+                <pattern name="Responsive Tiles">
+                    <description>Tiles that adapt to screen size</description>
+                    <code><![CDATA[
+{/* 1 column on mobile, 2 on tablet, 4 on desktop */}
+<Column sm={4} md={4} lg={4}>
+  <Tile>Tile 1</Tile>
+</Column>
+<Column sm={4} md={4} lg={4}>
+  <Tile>Tile 2</Tile>
+</Column>
+<Column sm={4} md={4} lg={4}>
+  <Tile>Tile 3</Tile>
+</Column>
+<Column sm={4} md={4} lg={4}>
+  <Tile>Tile 4</Tile>
+</Column>
+                    ]]>                    </code>
+                </pattern>
+            </patterns>
+        </responsive_implementation>
+
+        <grid_best_practices>
+            <title>Grid Best Practices</title>
+            <practices>
+                <practice priority="high">Use full-width columns (lg={16}) for headers and footers</practice>
+                <practice priority="high">Ensure column spans add up correctly at each breakpoint</practice>
+                <practice priority="high">Test responsive behavior at all breakpoints</practice>
+                <practice>Use Grid condensed/narrow variants when appropriate for content density</practice>
+                <practice>Keep Grid components focused on single logical content groups</practice>
+                <practice>Use consistent column patterns throughout the application</practice>
+            </practices>
+        </grid_best_practices>
+    </grid_system>
+
+    <component_integration priority="high">
+        <title>Component Integration Patterns</title>
+        <description>
+            Patterns for integrating Carbon components into the application with
+            targeted, minimal modifications.
+        </description>
+
+        <targeted_modifications priority="critical">
+            <title>Use Targeted Edits with apply_diff</title>
+            <description>
+                Make precise, line-specific changes rather than rewriting entire sections.
+            </description>
+            <principles>
+                <principle>Use apply_diff with exact SEARCH/REPLACE blocks for surgical edits</principle>
+                <principle>Make multiple related changes in one apply_diff operation</principle>
+                <principle>Preserve existing code structure, formatting, and style</principle>
+                <principle>Only change what needs to change - nothing more</principle>
+            </principles>
+            <examples>
+                <example>
+                    <title>Adding a single import</title>
+                    <code><![CDATA[
+<apply_diff>
+<path>src/components/Dashboard.jsx</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:1
+-------
+import { Grid, Column } from '@carbon/react';
+=======
+import { Grid, Column, Button } from '@carbon/react';
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+                    ]]>                    </code>
+                </example>
+                <example>
+                    <title>Multiple related changes in one apply_diff</title>
+                    <code><![CDATA[
+<apply_diff>
+<path>src/components/Dashboard.jsx</path>
+<diff>
+<<<<<<< SEARCH
+:start_line:1
+-------
+import { Grid, Column } from '@carbon/react';
+=======
+import { Grid, Column, Button } from '@carbon/react';
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+:start_line:25
+-------
+      </Column>
+    </Grid>
+  );
+=======
+      </Column>
+    </Grid>
+    <Grid>
+      <Column sm={4} md={8} lg={16}>
+        <Button>New Action</Button>
+      </Column>
+    </Grid>
+  );
+>>>>>>> REPLACE
+</diff>
+</apply_diff>
+                    ]]>                    </code>
+                </example>
+            </examples>
+        </targeted_modifications>
+
+        <file_organization>
+            <title>File Organization</title>
+            <principles>
+                <principle>Use write_to_file to create new files for new features</principle>
+                <principle>Keep feature-specific code in dedicated modules/components</principle>
+                <principle>Use clear separation of concerns (separate handler files, style files)</principle>
+                <principle>Make additions that can be easily removed if needed</principle>
+            </principles>
+        </file_organization>
+
+        <preserving_patterns>
+            <title>Preserve Existing Patterns</title>
+            <principles>
+                <principle>Use read_file to understand existing code style, indentation, and conventions</principle>
+                <principle>Match the existing patterns exactly</principle>
+                <principle>Don't introduce new patterns or refactor existing ones</principle>
+                <principle>Keep the same import organization and structure</principle>
+            </principles>
+            <key_principle>
+                "Change only what you must, touch only what you need" - Every line changed
+                should have a clear, necessary purpose.
+            </key_principle>
+        </preserving_patterns>
+    </component_integration>
+
+    <tool_usage_patterns priority="high">
+        <title>Tool Usage Patterns</title>
+        <description>
+            Effective use of available tools for understanding context, making informed
+            decisions, and verifying changes.
+        </description>
+
+        <read_before_write priority="critical">
+            <title>Always Read Before Writing</title>
+            <rules>
+                <rule>Always use read_file to understand existing code before modifying it</rule>
+                <rule>Never assume file contents - always verify</rule>
+                <rule>Read configuration files to understand build system setup</rule>
+                <rule>Read component source to understand integration points</rule>
+            </rules>
+        </read_before_write>
+
+        <verification priority="critical">
+            <title>Verify After Changes</title>
+            <rules>
+                <rule>Use read_file after apply_diff or write_to_file to confirm changes were applied correctly</rule>
+                <rule>Check that syntax is valid and formatting is preserved</rule>
+                <rule>Verify that all intended changes were made</rule>
+                <rule>Confirm no unintended changes occurred</rule>
+            </rules>
+        </verification>
+
+        <tool_selection>
+            <title>Choosing the Right Tool</title>
+            <tools>
+                <tool name="search_files">
+                    <when>Finding existing patterns and implementations</when>
+                    <when>Locating similar functionality across the codebase</when>
+                </tool>
+                <tool name="list_code_definition_names">
+                    <when>Understanding code structure and architecture</when>
+                    <when>Getting an overview of available functions and classes</when>
+                </tool>
+                <tool name="read_file">
+                    <when>Examining specific file contents</when>
+                    <when>Understanding implementation details</when>
+                    <when>Verifying changes after modifications</when>
+                </tool>
+                <tool name="apply_diff">
+                    <when>Making targeted, surgical edits to existing files</when>
+                    <when>Modifying specific lines or sections</when>
+                </tool>
+                <tool name="write_to_file">
+                    <when>Creating new files</when>
+                    <when>Complete file rewrites (rare)</when>
+                </tool>
+                <tool name="insert_content">
+                    <when>Adding new lines to files</when>
+                    <when>Inserting content at specific line numbers</when>
+                </tool>
+            </tools>
+        </tool_selection>
+
+        <workflow_principle>
+            <title>Read, Plan, Execute, Verify</title>
+            <description>
+                Always use tools to understand before changing, and verify after changing.
+            </description>
+            <steps>
+                <step>Read - Use read_file, search_files to understand current state</step>
+                <step>Plan - Determine minimal changes needed</step>
+                <step>Execute - Use apply_diff, write_to_file, or insert_content</step>
+                <step>Verify - Use read_file to confirm changes are correct</step>
+            </steps>
+        </workflow_principle>
+    </tool_usage_patterns>
+
+    <implementation_checklist>
+        <title>Implementation Checklist</title>
+        <description>
+            Use this checklist to ensure all critical steps are completed.
+        </description>
+
+        <phase name="before_starting">
+            <title>Before Starting Implementation</title>
+            <items>
+                <item priority="critical">Used search_files to find similar functionality</item>
+                <item priority="critical">Used read_file to examine existing patterns</item>
+                <item priority="critical">Used read_file to check build configuration</item>
+                <item priority="critical">Used read_file to read local component source code</item>
+                <item priority="high">Identified minimal set of files to modify</item>
+            </items>
+        </phase>
+
+        <phase name="during_implementation">
+            <title>During Implementation</title>
+            <items>
+                <item priority="critical">Used apply_diff with multiple SEARCH/REPLACE blocks for related changes</item>
+                <item priority="critical">Created separate Grid components for each logical content group</item>
+                <item priority="critical">Specified column spans for sm, md, and lg breakpoints</item>
+                <item priority="high">Preserved existing code patterns and style</item>
+                <item priority="high">Created new files for new features when appropriate</item>
+                <item priority="high">Used Carbon design tokens for styling</item>
+            </items>
+        </phase>
+
+        <phase name="after_implementation">
+            <title>After Implementation</title>
+            <items>
+                <item priority="critical">Used read_file to verify all changes were applied correctly</item>
+                <item priority="critical">Prompted user for browser validation</item>
+                <item priority="high">Confirmed all integration points are properly connected</item>
+                <item priority="high">Verified responsive behavior at all breakpoints</item>
+            </items>
+        </phase>
+    </implementation_checklist>
+</workflow>
